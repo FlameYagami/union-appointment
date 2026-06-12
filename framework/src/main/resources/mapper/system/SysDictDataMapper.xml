@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysDictDataMapper">
+    <sql id="pageSysDictDataSql">
+        FROM sys_dict_data t
+        WHERE t.enabled = '1'
+        <if test="req.dictCode != null and req.dictCode != ''">
+            AND t.dict_code = #{req.dictCode}
+        </if>
+        <if test="req.dictLabel != null and req.dictLabel != ''">
+            AND t.dict_label LIKE CONCAT(#{req.dictLabel}, '%')
+        </if>
+        <if test="req.dictValue != null and req.dictValue != ''">
+            AND t.dict_value LIKE CONCAT(#{req.dictValue}, '%')
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND t.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test='"${oracleExportLimit}" != "\${oracleExportLimit}"'>
+            <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimitOracle"></include>
+        </if>
+        ORDER BY t.dict_order ASC
+    </sql>
+
+    <select id="pageSysDictData" resultType="com.gk.framework.model.dto.system.sysDictData.SysDictDataPageResp">
+        SELECT t.id, t.dict_code, t.dict_label, t.dict_value, t.color_type, t.dict_css, t.dict_order, t.data_status
+        <include refid="pageSysDictDataSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="exportSysDictData" resultType="com.gk.framework.model.dto.system.sysDictData.SysDictDataExportResp" databaseId="mysql">
+        SELECT t.dict_code, t.dict_label, t.dict_value, t.color_type, t.dict_css, t.dict_order
+        <include refid="pageSysDictDataSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"></include>
+    </select>
+
+    <select id="exportSysDictData" resultType="com.gk.framework.model.dto.system.sysDictData.SysDictDataExportResp" databaseId="oracle">
+        SELECT t.dict_code, t.dict_label, t.dict_value, t.color_type, t.dict_css, t.dict_order
+        <include refid="pageSysDictDataSql">
+            <property name="req" value="${req}"/>
+            <property name="oracleExportLimit" value="1"/>
+        </include>
+    </select>
+
+    <select id="listDictValueById" resultType="java.lang.String">
+        SELECT t.dict_value
+        FROM sys_dict_data t
+        <where>
+            <if test="idList != null and idList.size != 0">
+                AND t.id IN
+                <foreach collection="idList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

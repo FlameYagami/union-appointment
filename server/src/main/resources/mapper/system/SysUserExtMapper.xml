@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.system.SysUserExtMapper">
+
+    <sql id="pageSysUserSql">
+        FROM sys_user su
+        INNER JOIN sys_user_info sui ON su.id = sui.user_id AND sui.enabled = '1'
+        INNER JOIN sys_user_role sur ON su.id = sur.user_id AND sur.enabled = '1'
+        INNER JOIN sys_role sr ON sur.role_id = sr.id AND sr.enabled = '1'
+        INNER JOIN sys_user_dept sud ON su.id = sud.user_id AND sud.enabled = '1'
+        INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1'
+        WHERE su.enabled = '1'
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND su.data_status = #{req.dataStatus}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND su.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test="req.superAdminId != null">
+            AND su.id != #{req.superAdminId}
+        </if>
+        <if test="req.userType != null and req.userType != ''">
+            AND sui.user_type = #{req.userType}
+        </if>
+        <if test="req.telephone != null and req.telephone != ''">
+            AND sui.telephone = #{req.telephone}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        GROUP BY su.id
+        ORDER BY su.id DESC
+    </sql>
+
+    <select id="pageSysUser" resultType="com.gk.server.model.dto.system.sysUser.SysUserPageResp" databaseId="mysql">
+        SELECT
+        su.id,
+        su.username,
+        su.nickname,
+        su.system_data,
+        su.data_status,
+        GROUP_CONCAT(DISTINCT sd.dept_name) AS dept_names,
+        GROUP_CONCAT(DISTINCT sr.role_name) AS role_names,
+        su.create_time,
+        su.blacklist_status,
+        sui.user_type,
+        sui.telephone
+        <include refid="pageSysUserSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <!-- 需要调整, 调整后删除注释 -->
+    <sql id="oraclePageSysUserSql">
+        FROM sys_user t
+        LEFT JOIN (SELECT su.id,
+        (SELECT LISTAGG(dept_name, ', ') WITHIN GROUP (ORDER BY dept_name)
+        FROM (SELECT DISTINCT sud.user_id, dept_name FROM sys_dept sd, sys_user_dept sud
+        WHERE sd.id = sud.dept_id AND sud.enabled = '1' AND sd.enabled = '1') ta
+        WHERE ta.user_id = su.id
+        GROUP BY ta.user_id) AS dept_names,
+        (SELECT LISTAGG(role_name, ', ') WITHIN GROUP (ORDER BY role_name)
+        FROM (SELECT DISTINCT sur.user_id, sr.role_name FROM sys_role sr, sys_user_role sur
+        WHERE sr.id = sur.role_id AND sur.enabled = '1' AND sr.enabled = '1') tb
+        WHERE tb.user_id = su.id
+        GROUP BY tb.user_id) AS role_names
+        FROM sys_user su
+        WHERE su.enabled = '1'
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.telephone != null and req.telephone != ''">
+            AND su.telephone LIKE CONCAT(#{req.telephone},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND su.data_status = #{req.dataStatus}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND su.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test="req.superAdminId != null">
+            AND su.id != #{req.superAdminId}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        <if test='"${oracleExportLimit}" != "\${oracleExportLimit}"'>
+            <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimitOracle"/>
+        </if>
+        GROUP BY su.id) t1 ON t.id = t1.id
+        ORDER BY t.id DESC
+    </sql>
+
+    <select id="pageSysUser" resultType="com.gk.server.model.dto.system.sysUser.SysUserPageResp" databaseId="oracle">
+        SELECT t.id, t.username, t.nickname, t.telephone, t.data_status, t.create_time, t1.dept_names, t1.role_names
+        <include refid="oraclePageSysUserSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="exportSysUser" resultType="com.gk.server.model.dto.system.sysUser.SysUserExportResp" databaseId="mysql">
+        SELECT
+        su.username,
+        su.nickname,
+        su.data_status,
+        GROUP_CONCAT(DISTINCT sd.dept_name) AS dept_names,
+        GROUP_CONCAT(DISTINCT sr.role_name) AS role_names,
+        sui.telephone
+        <include refid="pageSysUserSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"/>
+    </select>
+
+    <select id="exportSysUser" resultType="com.gk.server.model.dto.system.sysUser.SysUserExportResp" databaseId="oracle">
+        SELECT t.username, t.nickname, t.telephone, t.data_status, t.create_time, t1.dept_names, t1.role_names
+        <include refid="pageSysUserSql">
+            <property name="req" value="${req}"/>
+            <property name="oracleExportLimit" value="1"/>
+        </include>
+    </select>
+
+</mapper>

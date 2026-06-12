@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysDictMapper">
+    <sql id="pageSysDictSql">
+        FROM sys_dict t
+        WHERE t.enabled = '1'
+        <if test="req.dictName != null and req.dictName != ''">
+            AND t.dict_name LIKE CONCAT('%', #{req.dictName}, '%')
+        </if>
+        <if test="req.dictCode != null and req.dictCode != ''">
+            AND t.dict_code LIKE CONCAT('%', #{req.dictCode}, '%')
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND t.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test='"${oracleExportLimit}" != "\${oracleExportLimit}"'>
+            <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimitOracle"></include>
+        </if>
+        ORDER BY t.id DESC
+    </sql>
+
+    <select id="pageSysDict" resultType="com.gk.framework.model.dto.system.sysDict.SysDictPageResp">
+        SELECT t.id, t.dict_name, t.dict_code, t.remark, t.create_time
+        <include refid="pageSysDictSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="exportSysDict" resultType="com.gk.framework.model.dto.system.sysDict.SysDictExportResp" databaseId="mysql">
+        SELECT t.dict_name, t.dict_code, t.remark, t.create_time
+        <include refid="pageSysDictSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"></include>
+    </select>
+
+    <select id="exportSysDict" resultType="com.gk.framework.model.dto.system.sysDict.SysDictExportResp" databaseId="oracle">
+        SELECT t.dict_name, t.dict_code, t.remark, t.create_time
+        <include refid="pageSysDictSql">
+            <property name="req" value="${req}"/>
+            <property name="oracleExportLimit" value="1"/>
+        </include>
+    </select>
+
+</mapper>

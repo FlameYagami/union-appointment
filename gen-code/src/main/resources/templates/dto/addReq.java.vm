@@ -1,0 +1,24 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import ${package.Entity}.${servicePackage}.${entity};
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * $!{tableComment} 新增请求类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@ApiModel(value = "${tableComment}新增请求")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ${entity}AddReq extends ${entity}BaseReq {
+
+    @Override
+    public ${entity} toEntity() {
+        return super.toEntity();
+    }
+
+}

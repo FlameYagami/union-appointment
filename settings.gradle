@@ -1,0 +1,16 @@
+rootProject.name = 'union-appointment'
+
+include (':gen-code')
+
+include (':common')
+include (':security')
+include (':framework')
+include (':server')
+include (':app')
+
+include (':mail')
+include (':sms')
+
+include (':call-api')
+include (':open-api')
+

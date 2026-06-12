@@ -1,0 +1,5 @@
+# 接口加解密配置
+server-crypto:
+  # 接口加密白名单(无需加密的接口)
+  whiteList:
+    - /api/test/crypto # 范例, 无效接口, 不加密的接口需要告诉前端, 在前端一同配置

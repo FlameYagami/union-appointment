@@ -1,0 +1,67 @@
+package ${package.Entity}.${servicePackage};
+
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import ${basePackage}.common.model.base.BaseEntity;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}Resp;
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("BigDecimal")})
+import java.math.BigDecimal;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Date")} && (!${field.propertyName.equals("createTime")} && !${field.propertyName.equals("updateTime")}))
+import java.util.Date;
+import ${basePackage}.common.constant.DateConstant;
+import org.springframework.format.annotation.DateTimeFormat;
+        #break
+    #end
+#end
+
+#if(${entityLombokModel})
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+    #if(${chainModel})
+import lombok.experimental.Accessors;
+    #end
+#end
+
+/**
+ * $!{table.comment} 数据库模型
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+#if(${entityLombokModel})
+@Data
+  #if(${chainModel})
+@Accessors(chain = true)
+  #end
+@EqualsAndHashCode(callSuper = true)
+#end
+@TableName("${table.name}")
+public class ${entity} extends BaseEntity {
+
+#foreach($field in ${table.fields})
+    #if("$!field.comment" != "")
+    /**
+     * ${field.comment}
+     */
+    #end
+    #if(${field.keyFlag})
+    @TableId
+    #end
+    private ${field.propertyType} ${field.propertyName};
+
+#end
+
+    public ${entity}Resp toResp() {
+        return new ${entity}Resp()
+        #foreach($field in $table.fields)
+            #set($SetMethod = ${field.propertyName.substring(0, 1).toUpperCase()} + ${field.propertyName.substring(1)})
+                .set$SetMethod(${field.propertyName})#if(!${foreach.hasNext});#end
+        #end
+    }
+
+}

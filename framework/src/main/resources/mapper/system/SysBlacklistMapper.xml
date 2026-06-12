@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysBlacklistMapper">
+
+    <sql id="pageSysBlacklistSql">
+        FROM sys_user su
+        INNER JOIN sys_user_info sui ON   sui.user_id  =su.id AND sui.enabled = '1'
+        WHERE su.enabled = '1' AND su.blacklist_status = '1'
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.telephone != null and req.telephone != ''">
+            AND sui.telephone LIKE CONCAT(#{req.telephone},'%')
+        </if>
+        GROUP BY su.id
+        ORDER BY su.id DESC
+    </sql>
+
+    <select id="pageSysBlacklist" resultType="com.gk.framework.model.dto.system.sysBlacklist.SysBlacklistPageResp" databaseId="mysql">
+        SELECT su.id,
+        su.username,
+        su.nickname,
+        sui.telephone
+        <include refid="pageSysBlacklistSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="exportSysBlacklist" resultType="com.gk.framework.model.dto.system.sysBlacklist.SysBlacklistExportResp" databaseId="mysql">
+        SELECT
+        su.username,
+        su.nickname,
+        sui.telephone
+        <include refid="pageSysBlacklistSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"/>
+    </select>
+
+</mapper>

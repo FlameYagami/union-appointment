@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysMenuMapper">
+
+    <select id="listSysMenuTree" resultType="com.gk.framework.model.dto.system.sysMenu.SysMenuTreeResp">
+        SELECT sm.id,
+        sm.parent_id,
+        sm.menu_name,
+        sm.permission_code,
+        sm.menu_type,
+        sm.menu_path,
+        sm.menu_component,
+        sm.menu_icon,
+        sm.data_status,
+        sm.active_name,
+        sm.menu_order,
+        sm.create_time
+        FROM sys_menu sm
+        WHERE sm.enabled = '1'
+        <if test="req.menuName != null and req.menuName != ''">
+            AND sm.menu_name LIKE CONCAT(#{req.menuName},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND sm.data_status = #{req.dataStatus}
+        </if>
+        ORDER BY sm.menu_order, sm.id
+    </select>
+
+    <select id="getEnableChildMenuIds" resultType="java.lang.Long" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psm.id, psm.parent_id
+            FROM sys_menu psm
+            WHERE psm.enabled = '1'
+              AND psm.parent_id = #{menuId}
+            UNION ALL
+            SELECT csm.id, csm.parent_id
+            FROM sys_menu csm,
+                 temp tsm
+            WHERE csm.enabled = '1'
+              AND tsm.id = csm.parent_id
+        )
+        SELECT id
+        FROM temp
+    </select>
+
+    <select id="getEnableChildMenuIds" resultType="java.lang.Long" databaseId="oracle">
+        SELECT id
+        FROM sys_menu sm
+        WHERE sm.enabled = '1'
+        START WITH sm.parent_id = #{menuId}
+        CONNECT BY PRIOR sm.id = sm.parent_id
+    </select>
+
+    <select id="getChildMenuIds" resultType="java.lang.Long" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psm.id, psm.parent_id
+            FROM sys_menu psm
+            WHERE psm.parent_id = #{menuId}
+            UNION ALL
+            SELECT csm.id, csm.parent_id
+            FROM sys_menu csm,
+                 temp tsm
+            WHERE tsm.id = csm.parent_id
+        )
+        SELECT id
+        FROM temp
+    </select>
+
+    <select id="getChildMenuIds" resultType="java.lang.Long" databaseId="oracle">
+        SELECT id
+        FROM sys_menu sm
+        START WITH sm.parent_id = #{menuId}
+        CONNECT BY PRIOR sm.id = sm.parent_id
+    </select>
+
+    <select id="listChildMenu" resultType="com.gk.framework.model.entity.system.SysMenu" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psm.*
+            FROM sys_menu psm
+            WHERE psm.id = #{menuId}
+            UNION ALL
+            SELECT csm.*
+            FROM sys_menu csm,
+                 temp tsm
+            WHERE tsm.id = csm.parent_id
+        )
+        SELECT *
+        FROM temp
+    </select>
+
+    <select id="listChildMenu" resultType="com.gk.framework.model.entity.system.SysMenu" databaseId="oracle">
+        SELECT sm.id, sm.parent_id, sm.menu_name, sm.permission_code, sm.menu_type, sm.menu_path, sm.menu_component,
+               sm.menu_icon, sm.data_status, sm.menu_cached, sm.menu_show, sm.inner_link, sm.menu_open, sm.menu_order,
+               sm.create_by, sm.create_time, sm.update_by, sm.update_time, sm.enabled
+        FROM sys_menu sm
+        START WITH sm.id = #{menuId}
+        CONNECT BY PRIOR sm.id = sm.parent_id
+    </select>
+
+</mapper>

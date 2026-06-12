@@ -1,0 +1,135 @@
+package ${package.Controller}.${servicePackage};
+
+import com.gk.common.enums.OperateType;
+import com.gk.framework.annotation.OperateLog;
+import com.gk.framework.annotation.RepeatSubmit;
+#if(${swagger})
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+#end
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}AddReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}EditReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}Resp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportResp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageResp;
+
+import org.springframework.web.bind.annotation.*;
+import com.gk.common.model.others.ApiResult;
+import com.gk.common.model.others.PageResult;
+import ${package.Service}.${servicePackage}.${table.serviceName};
+import javax.annotation.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.gk.common.utils.ExcelUtils;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
+
+/**
+ * $!{table.comment} 控制类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+
+#if(${restControllerStyle})
+@RestController
+#else
+@Controller
+#end
+@RequestMapping("/api/${table.name.replace("_","-")}")
+#if(${swagger})
+@Api(tags = "$!{tableComment}管理")
+#end
+@Validated
+public class ${table.controllerName} {
+
+    @Resource
+    private ${table.serviceName} ${lowerService};
+
+## 主键类型判断
+#foreach($field in ${table.fields})
+    #if(${field.keyFlag})
+## 主键类型
+        #set($idType=${field.propertyType})
+## 主键名称
+        #set($idName=${field.propertyName})
+## 跳出
+        #break
+    #end
+#end
+    @GetMapping("/page")
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:page')")
+#if(${swagger})
+    @ApiOperation(value = "${tableComment}分页查询", notes = "${module}:${table.name.replace("_","-")}:page")
+#end
+    public PageResult<${entity}PageResp> pageList(${entity}PageReq req) {
+        return PageResult.ok(${lowerService}.pageList(req));
+    }
+
+    @PostMapping("/export")
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:export')")
+#if(${swagger})
+    @ApiOperation(value = "${tableComment}列表导出", notes = "${module}:${table.name.replace("_","-")}:export")
+#end
+    @OperateLog(title = "${tableComment}列表导出", operateType = OperateType.EXPORT)
+    public void exportList(HttpServletResponse response, @RequestBody ${entity}ExportReq req) {
+        List<${entity}ExportResp> dataList = ${lowerService}.exportList(req);
+        ExcelUtils.write(response, "列表数据", ${entity}ExportResp.class, dataList);
+    }
+
+    @PostMapping
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:add')")
+    @RepeatSubmit
+#if(${swagger})
+    @ApiOperation(value = "新增${tableComment}", notes = "${module}:${table.name.replace("_","-")}:add")
+#end
+    @OperateLog(title = "新增${tableComment}", operateType = OperateType.ADD)
+    public ApiResult<Long> add(@RequestBody @Valid ${entity}AddReq req) {
+        long id = ${lowerService}.add(req);
+        return ApiResult.ok(id);
+    }
+
+    @PutMapping
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:edit')")
+#if(${swagger})
+    @ApiOperation(value = "修改${tableComment}", notes = "${module}:${table.name.replace("_","-")}:edit")
+#end
+    @OperateLog(title = "修改${tableComment}", operateType = OperateType.UPDATE)
+    public ApiResult<?> edit(@RequestBody @Valid ${entity}EditReq req) {
+        ${lowerService}.edit(req);
+        return ApiResult.ok();
+    }
+
+    @DeleteMapping
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:delete')")
+#if(${swagger})
+    @ApiOperation(value = "删除${tableComment}", notes = "${module}:${table.name.replace("_","-")}:delete")
+#end
+    @OperateLog(title = "删除${tableComment}", operateType = OperateType.DELETE)
+    public ApiResult<?> delete(@RequestBody @NotEmpty(message = "${tableComment}id缺失") List<@Min(value = 1000000000000000001L, message = "id不合法") ${idType}> idList) {
+        ${lowerService}.delete(idList);
+        return ApiResult.ok();
+    }
+
+    @GetMapping
+    @PreAuthorize("@ss.hasPermission('${module}:${table.name.replace("_","-")}:info')")
+#if(${swagger})
+    @ApiOperation(value = "${tableComment}查询详情", notes = "${module}:${table.name.replace("_","-")}:info")
+#end
+    @ApiImplicitParam(name = "id", value = "${tableComment}id", required = true, dataTypeClass = Long.class, example = "1000000000000000001")
+    public ApiResult<${entity}Resp> findOne(@RequestParam("id") @Min(value = 1000000000000000001L, message = "id不合法") long id) {
+        return ApiResult.ok(${lowerService}.findOne(id));
+    }
+
+}

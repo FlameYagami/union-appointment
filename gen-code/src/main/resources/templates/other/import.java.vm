@@ -1,0 +1,39 @@
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Date")} && (!${field.propertyName.equals("createTime")} && !${field.propertyName.equals("updateTime")}))
+import com.gk.common.constant.DateConstant;
+import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
+        #break
+    #end
+#end
+
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Integer")} || ${field.propertyType.equals("Long")})
+import javax.validation.constraints.Min;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("String")})
+import javax.validation.constraints.NotBlank;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(!${field.propertyType.equals("Integer")} && !${field.propertyType.equals("Long")} && !${field.propertyType.equals("Long")})
+import javax.validation.constraints.NotNull;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("BigDecimal")})
+import java.math.BigDecimal;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Date")} && (!${field.propertyName.equals("createTime")} && !${field.propertyName.equals("updateTime")}))
+import java.util.Date;
+        #break
+    #end
+#end

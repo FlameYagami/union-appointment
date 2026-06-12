@@ -1,0 +1,14 @@
+verify-mail:
+  host: smtpdm.aliyun.com
+  port: 465
+  username: service@v.mail.username.cc
+  password: OaPush88187877
+  fromAddress: service@v.mail.address.cc
+  auth: true
+feedback-mail:
+  host: smtp.mxhichina.com
+  port: 465
+  username: push@username.cn
+  password: Hello123
+  fromAddress: push@address.cn
+  auth: true

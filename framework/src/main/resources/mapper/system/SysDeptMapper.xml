@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysDeptMapper">
+
+    <select id="listSysDeptTree" resultType="com.gk.framework.model.dto.system.sysDept.SysDeptTreeResp">
+        SELECT
+        sd.id,
+        sd.parent_id,
+        sd.dept_name,
+        sd.dept_code,
+        sd.data_status,
+        sd.dept_order,
+        sd.create_time
+        FROM sys_dept sd
+        WHERE sd.enabled = '1'
+        <if test="req.deptName != null and req.deptName != ''">
+            AND sd.dept_name LIKE CONCAT(#{req.deptName},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND sd.data_status = #{req.dataStatus}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY sd.dept_order, sd.id
+    </select>
+
+    <select id="listSysDeptTreeLabel" resultType="com.gk.framework.model.bo.system.sysDept.SysDeptTreeLabel">
+        SELECT
+        sd.id,
+        sd.parent_id,
+        sd.dept_name,
+        sd.dept_level,
+        sd.data_status
+        FROM sys_dept sd
+        WHERE sd.enabled = '1'
+        <if test="query.dataScopeSql != null and query.dataScopeSql != ''">
+            ${query.dataScopeSql}
+        </if>
+        ORDER BY sd.dept_order, sd.id
+    </select>
+
+    <select id="listSysDeptTreeLabelByDeptId" resultType="com.gk.framework.model.bo.system.sysDept.SysDeptTreeLabel" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psd.id, psd.parent_id, psd.dept_name, psd.dept_level, psd.dept_order, psd.data_status
+            FROM sys_dept psd
+            WHERE psd.enabled = '1'
+              AND psd.id = #{deptId}
+            UNION ALL
+            SELECT csd.id, csd.parent_id, csd.dept_name, csd.dept_level, csd.dept_order, csd.data_status
+            FROM sys_dept csd,
+                 temp tsd
+            WHERE csd.enabled = '1'
+              AND tsd.id = csd.parent_id
+        )
+        SELECT tsd.id,
+               tsd.parent_id,
+               tsd.dept_name,
+               tsd.dept_level,
+               tsd.data_status
+        FROM temp tsd
+        ORDER BY tsd.dept_order, tsd.id
+    </select>
+
+    <select id="listSysDeptTreeLabelByDeptId" resultType="com.gk.framework.model.bo.system.sysDept.SysDeptTreeLabel" databaseId="oracle">
+        SELECT sd.id,
+               sd.parent_id,
+               sd.dept_name,
+               sd.dept_level,
+               sd.data_status
+        FROM sys_dept sd
+        WHERE sd.enabled = '1'
+        START WITH sd.id = #{deptId}
+        CONNECT BY PRIOR sd.id = sd.parent_id
+        ORDER BY sd.dept_order, sd.id
+    </select>
+
+    <select id="getChildDeptIds" resultType="long" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psd.id, psd.parent_id
+            FROM sys_dept psd
+            WHERE psd.parent_id = #{deptId}
+            UNION ALL
+            SELECT csd.id, csd.parent_id
+            FROM sys_dept csd,
+                 temp tsd
+            WHERE tsd.id = csd.parent_id
+        )
+        SELECT id
+        FROM temp
+    </select>
+
+    <select id="getChildDeptIds" resultType="long" databaseId="oracle">
+        SELECT id
+        FROM sys_dept sd
+        START WITH sd.parent_id = #{deptId}
+        CONNECT BY PRIOR sd.id = sd.parent_id
+    </select>
+
+    <select id="getEnableChildDeptIds" resultType="long" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psd.id, psd.parent_id
+            FROM sys_dept psd
+            WHERE psd.enabled = '1'
+              AND psd.parent_id = #{deptId}
+            UNION ALL
+            SELECT csd.id, csd.parent_id
+            FROM sys_dept csd,
+                 temp tsd
+            WHERE csd.enabled = '1'
+              AND tsd.id = csd.parent_id
+        )
+        SELECT id
+        FROM temp
+    </select>
+
+    <select id="getEnableChildDeptIds" resultType="long" databaseId="oracle">
+        SELECT id
+        FROM sys_dept sd
+        WHERE sd.enabled = '1'
+        START WITH sd.parent_id = #{deptId}
+        CONNECT BY PRIOR sd.id = sd.parent_id
+    </select>
+
+    <select id="listChildDept" resultType="com.gk.framework.model.entity.system.SysDept" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psd.*
+            FROM sys_dept psd
+            WHERE psd.id = #{deptId}
+            UNION ALL
+            SELECT csd.*
+            FROM sys_dept csd,
+                 temp tsd
+            WHERE tsd.id = csd.parent_id
+        )
+        SELECT *
+        FROM temp
+    </select>
+
+    <select id="listChildDept" resultType="com.gk.framework.model.entity.system.SysDept" databaseId="oracle">
+        SELECT id, parent_id, dept_name, dept_code, dept_level, dept_type, data_status, dept_order, create_by,
+               create_time, update_by, update_time, enabled
+        FROM sys_dept sd
+        START WITH sd.id = #{deptId}
+        CONNECT BY PRIOR sd.id = sd.parent_id
+    </select>
+
+    <select id="listEnableChildDept" resultType="com.gk.framework.model.entity.system.SysDept" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT psd.*
+            FROM sys_dept psd
+            WHERE psd.enabled = '1'
+              AND psd.id = #{deptId}
+            UNION ALL
+            SELECT csd.*
+            FROM sys_dept csd,
+                 temp tsd
+            WHERE csd.enabled = '1'
+              AND tsd.id = csd.parent_id
+        )
+        SELECT *
+        FROM temp
+    </select>
+
+    <select id="listEnableChildDept" resultType="com.gk.framework.model.entity.system.SysDept" databaseId="oracle">
+        SELECT id, parent_id, dept_name, dept_code, dept_level, dept_type, data_status, dept_order, create_by,
+               create_time, update_by, update_time, enabled
+        FROM sys_dept sd
+        WHERE sd.enabled = '1'
+        START WITH sd.id = #{deptId}
+        CONNECT BY PRIOR sd.id = sd.parent_id
+    </select>
+
+    <select id="getParentDeptIds" resultType="long" databaseId="mysql">
+        WITH RECURSIVE temp AS (
+            SELECT csd.id, csd.parent_id
+            FROM sys_dept csd
+            WHERE csd.id = #{deptId}
+            UNION ALL
+            SELECT psd.id, psd.parent_id
+            FROM sys_dept psd,
+                 temp tsd
+            WHERE psd.id = tsd.parent_id
+        )
+        SELECT id
+        FROM temp
+    </select>
+
+    <select id="getParentDeptIds" resultType="long" databaseId="oracle">
+        SELECT id
+        FROM sys_dept sd
+        START WITH sd.id = #{deptId}
+        CONNECT BY PRIOR sd.parent_id = sd.id
+    </select>
+
+</mapper>

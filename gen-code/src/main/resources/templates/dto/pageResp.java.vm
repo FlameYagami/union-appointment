@@ -1,0 +1,23 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.Accessors;
+#parse("templates/other/import.java.vm")
+
+/**
+ * $!{tableComment} 分页响应类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@ApiModel(value = "${tableComment}分页响应")
+@Data
+@Accessors(chain = true)
+public class ${entity}PageResp {
+#foreach($field in ${table.fields})
+
+    #parse("templates/other/propertyResp.java.vm")
+#end
+}

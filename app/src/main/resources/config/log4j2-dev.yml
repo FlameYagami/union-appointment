@@ -1,0 +1,182 @@
+# status: 共有8个级别，按照从低到高为：ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+# monitorInterval: 设置配置文件的动态加载时间的，单位是秒
+Configuration:
+  status: INFO
+  monitorInterval: 60
+  Properties: # 定义全局变量
+    Property:
+      - name: log.path
+        value: D:/project/union-appointment/logs
+      - name: log.name
+        value: server
+      - name: log.size
+        value: 200MB
+      - name: log.pattern
+        value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%t] %C [%L] -> %m%n"
+        # 异步日志不跟踪类名及行号,避免影响性能
+      - name: log.async_pattern
+        value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%t] -> %m%n"
+        # 对接日志
+      - name: call-api-log-name
+        value: call-api
+      - name: power-job-log-name
+        value: power-job-log
+  Appenders:
+    Console: # 输出到控制台
+      name: CONSOLE
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5level} [%magenta{%t}] %cyan{%-30.30C{1.}} %blue{[%3L]} %yellow{->} %highlight{%m%n}{Fatal=red, Warn=yellow, Info=blue}"
+    RollingRandomAccessFile: # 日志文件输出设置
+      # 基本日志
+      - name: FILE
+        fileName: ${log.path}/${log.name}.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${log.name}-%d{yyyyMMdd}-%i.log"
+        PatternLayout:
+          charset: UTF-8
+          pattern: ${log.pattern}
+        Policies:
+          TimeBasedTriggeringPolicy: # 按天分类
+            modulate: true
+            interval: 1
+          SizeBasedTriggeringPolicy: # 按大小
+            size: ${log.size}
+        DefaultRolloverStrategy:
+          Delete:
+            basePath: ${log.path}
+            maxDepth: 2
+            IfFileName:
+              glob: "${log.name}*.log"
+            IfLastModified:
+              age: "31d"
+      # 警告日志
+      - name: WARN
+        fileName: ${log.path}/${log.name}-warn.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${log.name}-%d{yyyyMMdd}-%i.warn.log"
+        PatternLayout:
+          charset: UTF-8
+          pattern: ${log.pattern}
+        Filters:
+          ThresholdFilter: # 一定要先去除不接受的日志级别，然后获取需要接受的日志级别
+            - level: error
+              onMatch: DENY
+              onMismatch: NEUTRAL
+            - level: warn
+              onMatch: ACCEPT
+              onMismatch: DENY
+        Policies:
+          TimeBasedTriggeringPolicy: # 按天分类
+            modulate: true
+            interval: 1
+          SizeBasedTriggeringPolicy: # 按大小
+            size: ${log.size}
+        DefaultRolloverStrategy:
+          Delete:
+            basePath: ${log.path}
+            maxDepth: 2
+            IfFileName:
+              glob: "${log.name}*.log"
+            IfLastModified:
+              age: "31d"
+      # 错误日志
+      - name: ERROR
+        fileName: ${log.path}/${log.name}-error.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${log.name}-%d{yyyyMMdd}-%i.error.log"
+        PatternLayout:
+          charset: UTF-8
+          pattern: ${log.pattern}
+        Filters:
+          ThresholdFilter: # 一定要先去除不接受的日志级别，然后获取需要接受的日志级别
+            - level: error
+              onMatch: ACCEPT
+              onMismatch: DENY
+        Policies:
+          TimeBasedTriggeringPolicy: # 按天分类
+            modulate: true
+            interval: 1
+          SizeBasedTriggeringPolicy: # 按大小
+            size: ${log.size}
+        DefaultRolloverStrategy:
+          Delete:
+            basePath: ${log.path}
+            maxDepth: 2
+            IfFileName:
+              glob: "${log.name}*.log"
+            IfLastModified:
+              age: "31d"
+      # 对接日志
+      - name: CALL_API_LOG_FILE
+        fileName: ${log.path}/${call-api-log-name}.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${call-api-log-name}-%d{yyyyMMdd}-%i.log"
+        PatternLayout:
+          charset: UTF-8
+          Pattern: ${log.async_pattern}
+        Policies:
+          TimeBasedTriggeringPolicy:
+            modulate: true
+            interval: 1
+          SizeBasedTriggeringPolicy:
+            size: ${log.size}
+        DefaultRolloverStrategy:
+          Delete:
+            basePath: ${log.path}
+            maxDepth: 2
+            IfFileName:
+              glob: "${call-api-log-name}*.log"
+            IfLastModified:
+              age: "31d"
+      # 定时任务日志
+      - name: POWER_JOB_LOG_FILE
+        fileName: ${log.path}/${power-job-log-name}.log
+        filePattern: "${log.path}/$${date:yyyy-MM}/${power-job-log-name}-%d{yyyyMMdd}-%i.log"
+        PatternLayout:
+          charset: UTF-8
+          Pattern: ${log.async_pattern}
+        Policies:
+          TimeBasedTriggeringPolicy:
+            modulate: true
+            interval: 1
+          SizeBasedTriggeringPolicy:
+            size: ${log.size}
+        DefaultRolloverStrategy:
+          Delete:
+            basePath: ${log.path}
+            maxDepth: 2
+            IfFileName:
+              glob: "${power-job-log-name}*.log"
+            IfLastModified:
+              age: "31d"
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: CONSOLE
+        - ref: FILE
+        - ref: WARN
+        - ref: ERROR
+    AsyncLogger: #定义异步logger，Logger:是同步的。AsyncLogger:是异步的。异步会提高代码性能，单独建立一个进程，进行日志打印和管理。这个线程由disruptor管理。disruptor要单独pom引入
+      # 对接日志
+      - name: CallApiLog
+        level: info
+        additivity: false
+#        includeLocation: true #AsyncLogger不可使用这个配置,会引发性能问题
+        AppenderRef:
+          - ref: CONSOLE
+          - ref: CALL_API_LOG_FILE
+      # 定时任务日志
+      - name: tech.powerjob.worker
+        level: info
+        additivity: false
+        AppenderRef:
+          - ref: CONSOLE
+          - ref: POWER_JOB_LOG_FILE
+#      - name: org.apache.kafka
+#        名称，可以使包名，类路径，直接可以作用在该类上或者某一包下所有的类。如果自定义名称如：name:abc,在springboot中@slf4j(topic="abc")，就可以用了。
+#        additivity: false
+#        是否重复，默认true，设置false，这表示在root定义日志记录器，不再重复打印。
+#        所有自定义的logger都是集成root里面的，所以默认会在root打印后再在自定义的logger中打印，
+#        includeLocation: true
+#        一般异步logger是默认不记录输出位置的, 如果需要强制记录输出位置, 可以配置includeLocation: true来实现打印类名及行号等位置信息
+#        如果使用disruptor异步logger时,异步日志需要在将日志消息传递给另一个线程之前做出此决定，在该点之后，位置信息将丢失。对于异步日志来说，获取堆栈跟踪快照的性能影响甚至更高
+#        所以一般在使用异步logger时,不记录输出打印的类名和行号, 以免造成性能压力
+

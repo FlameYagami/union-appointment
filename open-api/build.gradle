@@ -1,0 +1,11 @@
+group 'com.gk.open-api'
+description '开放平台模块'
+
+bootJar.enabled = false
+jar.enabled = true
+
+dependencies {
+    implementation project(':common')
+    implementation project(':framework')
+    implementation project(':server')
+}

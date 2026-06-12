@@ -1,0 +1,9 @@
+# token配置
+token:
+  # 令牌有效期（单位:分钟）
+  expireTime: 43200
+
+spring:
+  config:
+    import:
+      - application-security-common.yml

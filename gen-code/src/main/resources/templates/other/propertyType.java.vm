@@ -1,0 +1,8 @@
+#if(${field.propertyType.equals("Integer")})
+    #set($PropertyType = "int")
+#elseif(${field.propertyType.equals("Long")})
+    #set($PropertyType = ${field.propertyType.toLowerCase()})
+#else
+    #set($PropertyType= ${field.propertyType})
+#end
+    private ${PropertyType} ${field.propertyName};

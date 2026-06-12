@@ -1,0 +1,12 @@
+group 'com.gk.gen-code'
+description '代码生成模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    implementation 'com.baomidou:mybatis-plus-generator:3.5.2' // 版本不升级
+    implementation "org.apache.velocity:velocity-engine-core:2.3"
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation "cn.hutool:hutool-all:${hutoolVersion}"
+}

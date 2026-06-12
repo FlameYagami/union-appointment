@@ -1,0 +1,48 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.format.DateTimeFormat;
+import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Date")} && (!${field.propertyName.equals("createTime")} && !${field.propertyName.equals("updateTime")}))
+    import com.gk.common.constant.DateConstant;
+        #break
+    #end
+#end
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("BigDecimal")})
+    import java.math.BigDecimal;
+        #break
+    #end
+#end
+#foreach($field in ${table.fields})
+    #if(${field.propertyType.equals("Date")} && (!${field.propertyName.equals("createTime")} && !${field.propertyName.equals("updateTime")}))
+    import java.util.Date;
+        #break
+    #end
+#end
+
+/**
+ * $!{tableComment} 导出响应类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@Data
+@Accessors(chain = true)
+@HeadRowHeight(20)
+public class ${entity}ExportResp {
+#foreach($field in $table.fields)
+    #if(!${field.keyFlag})
+
+    @ExcelProperty("${field.comment}")
+        #if(${field.propertyType.equals("Date")})
+    @DateTimeFormat(DateConstant.DEFAULT_PATTERN)
+        #end
+    private ${field.propertyType} ${field.propertyName};
+    #end
+#end
+}

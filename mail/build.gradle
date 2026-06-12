@@ -1,0 +1,10 @@
+group 'com.gk.mail'
+description '邮件模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-mail:${springMailVersion}"
+    implementation "org.springframework:spring-context-support:${springContextVersion}"
+}

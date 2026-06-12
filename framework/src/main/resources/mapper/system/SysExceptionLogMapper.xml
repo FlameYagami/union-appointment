@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysExceptionLogMapper">
+
+    <sql id="pageSysExceptionLogSql">
+        FROM sys_exception_log t
+        WHERE t.enabled = '1'
+        ORDER BY t.id DESC
+    </sql>
+
+    <select id="pageSysExceptionLog" resultType="com.gk.framework.model.dto.system.sysExceptionLog.SysExceptionLogPageResp" databaseId="mysql">
+        SELECT
+        sel.username,
+        sel.exception_type,
+        sel.ip,
+        sel.location,
+        sel.browser,
+        sel.os,
+        sel.create_time,
+        su.id AS user_id,
+        IFNULL(su.blacklist_status, 0) AS blacklist_status
+        FROM sys_exception_log sel
+        LEFT JOIN sys_user su ON sel.username = su.username
+        WHERE sel.enabled = '1'
+        <if test="req.startTime != null and req.endTime != null">
+            AND sel.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test="req.username != null">
+            AND sel.username like CONCAT(#{req.username}, '%')
+        </if>
+        ORDER BY sel.id DESC
+    </select>
+
+    <select id="exportSysExceptionLog" resultType="com.gk.framework.model.dto.system.sysExceptionLog.SysExceptionLogExportResp" databaseId="mysql">
+        SELECT t.username,t.exception_type,t.ip,t.location,t.browser,t.os
+        <include refid="pageSysExceptionLogSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"/>
+    </select>
+
+</mapper>

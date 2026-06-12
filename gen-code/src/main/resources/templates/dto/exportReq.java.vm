@@ -1,0 +1,18 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import io.swagger.annotations.ApiModel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * $!{tableComment} 导出请求类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@ApiModel(value = "${tableComment}导出请求")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ${entity}ExportReq extends ${entity}PageReq {
+
+}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.generate.GenCodeMapper">
+
+    <select id="listTable" resultType="com.gk.framework.model.dto.generate.GenTableResp" databaseId="mysql">
+        SELECT table_name, table_comment, create_time, update_time FROM information_schema.tables
+        WHERE table_schema = (SELECT database()) AND table_type = 'BASE TABLE'
+        <if test="req.tableName != null and req.tableName != ''">
+            AND table_name LIKE CONCAT('%', #{req.tableName}, '%')
+        </if>
+        <if test="req.tableComment != null and req.tableComment != ''">
+            AND table_comment LIKE CONCAT('%', #{req.tableComment}, '%')
+        </if>
+    </select>
+
+    <select id="listTable" resultType="com.gk.framework.model.dto.generate.GenTableResp" databaseId="oracle">
+        SELECT t.table_name, t1.comments FROM user_tables t
+        LEFT JOIN user_tab_comments t1 ON t.table_name = t1.table_name
+        <if test="req.tableName != null and req.tableName != ''">
+            AND t.table_name LIKE CONCAT('%', #{req.tableName}, '%')
+        </if>
+        <if test="req.tableComment != null and req.tableComment != ''">
+            AND t1.comments LIKE CONCAT('%', #{req.tableComment}, '%')
+        </if>
+    </select>
+
+    <select id="listTableColumn" resultType="com.gk.framework.model.dto.generate.GenColumnResp" databaseId="mysql">
+        SELECT column_name, column_comment, data_type, character_maximum_length AS str_length FROM information_schema.columns
+        WHERE table_schema = (SELECT database()) AND table_name = #{tableName}
+        AND column_name NOT IN ('create_by','create_time','update_by','update_time','enabled')
+        ORDER BY ordinal_position
+    </select>
+
+    <select id="listTableColumn" resultType="com.gk.framework.model.dto.generate.GenColumnResp" databaseId="oracle">
+        SELECT t.column_name, t1.comments, t.data_type, t.data_length FROM user_tab_columns t
+        LEFT JOIN user_col_comments t1 ON t.column_name = t1.column_name
+        WHERE t.table_name = #{tableName} AND t1.table_name = #{tableName}
+        AND t.column_name NOT IN ('CREATE_BY','CREATE_TIME','UPDATE_BY','UPDATE_TIME','ENABLED')
+        ORDER BY t.column_id
+    </select>
+</mapper>

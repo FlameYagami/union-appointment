@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysUserDeptMapper">
+
+    <select id="getEnableDeptIdByUserId" resultType="java.lang.Long">
+        SELECT sud.dept_id
+        FROM sys_user_dept sud
+        INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1' AND sd.data_status = '1'
+        WHERE sud.enabled = '1'
+        AND sud.user_id = #{userId}
+    </select>
+
+</mapper>

@@ -1,0 +1,9 @@
+#if(${field.propertyType.equals("String")})
+        <if test="req.${field.propertyName} != null and req.${field.propertyName} != ''">
+            AND ${tableAbbr}.${field.columnName} = #{req.${field.propertyName}}
+        </if>
+#else
+        <if test="req.${field.propertyName} != null">
+            AND ${tableAbbr}.${field.columnName} = #{req.${field.propertyName}}
+        </if>
+#end

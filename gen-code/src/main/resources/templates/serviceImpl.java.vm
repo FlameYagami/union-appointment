@@ -1,0 +1,123 @@
+package ${package.ServiceImpl}.${servicePackage};
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import ${package.Mapper}.${servicePackage}.${table.mapperName};
+import ${package.Service}.${servicePackage}.${table.serviceName};
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}AddReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}EditReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}Resp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportResp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageResp;
+import ${package.Entity}.${servicePackage}.${entity};
+import com.gk.common.enums.EnabledType;
+import com.gk.common.enums.SysStatus;
+import com.gk.common.model.exception.SysException;
+import com.gk.common.utils.JsonUtils;
+import com.gk.framework.annotation.DataScope;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * $!{table.comment} 服务实现类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+
+@Service
+@Slf4j
+public class ${table.serviceImplName} extends ServiceImpl<${table.mapperName}, ${entity}> implements ${table.serviceName} {
+## 主键类型判断
+#foreach($field in ${table.fields})
+    #if(${field.keyFlag})
+## 主键类型
+        #set($idType=${field.propertyType})
+## 主键名称
+        #set($idName=${field.propertyName})
+## 主键首字母大写名称
+        #set($idCapitalName=${field.capitalName})
+## 跳出
+        #break
+    #end
+#end
+
+    /**
+     * 分页查询
+     */
+    @DataScope(bizTableAlias = "${tableAbbr}")
+    @Override
+    public IPage<${entity}PageResp> pageList(${entity}PageReq req) {
+        return baseMapper.page${entity}(req.createPage(), req);
+    }
+
+    /**
+     * 全表导出
+     */
+    @Override
+    public List<${entity}ExportResp> exportList(${entity}ExportReq req) {
+        return baseMapper.export${entity}(req);
+    }
+
+    /**
+     * 新增
+     */
+    @Override
+    public long add(${entity}AddReq req) {
+        ${entity} ${table.entityPath} = req.toEntity();
+        if (!save(${table.entityPath})) {
+            log.error("Add ${entity} Error: add failed, {}", JsonUtils.toJson(${table.entityPath}));
+            throw new SysException(SysStatus.OPERATE_FAILED);
+        }
+        return ${table.entityPath}.get${idCapitalName}();
+    }
+
+    /**
+     * 修改
+     */
+    @Override
+    public void edit(${entity}EditReq req) {
+        ${entity} ${table.entityPath} = req.toEntity();
+        if (!updateById(${table.entityPath})) {
+            log.error("Edit ${entity} Error: edit failed, {}", JsonUtils.toJson(${table.entityPath}));
+            throw new SysException(SysStatus.OPERATE_FAILED);
+        }
+    }
+
+    /**
+     * 删除
+     */
+    @Override
+    public void delete(List<${idType}> idList) {
+        boolean result = lambdaUpdate()
+                .in(${entity}::get${idCapitalName}, idList)
+                .set(${entity}::getEnabled, EnabledType.DISABLE.value)
+                .update();
+        if (!result) {
+            log.error("Delete ${entity} Error: delete failed, {}", idList);
+            throw new SysException(SysStatus.OPERATE_FAILED);
+        }
+    }
+
+    /**
+     * 单个查询
+     */
+    @Override
+    public ${entity}Resp findOne(long id) {
+        ${entity} ${table.entityPath} = lambdaQuery()
+                .eq(${entity}::getEnabled, EnabledType.ENABLE.value)
+                .eq(${entity}::get${idCapitalName}, id)
+                .one();
+        if (${table.entityPath} == null) {
+            return null;
+        }
+        return ${table.entityPath}.toResp();
+    }
+
+}
+

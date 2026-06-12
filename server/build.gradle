@@ -1,0 +1,12 @@
+group 'com.gk.server'
+description '服务模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    implementation project(':common')
+    implementation project(':framework')
+    implementation project(':security')
+    implementation project(':call-api')
+}

@@ -1,0 +1,11 @@
+group 'com.gk.security'
+description '认证鉴权模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+
+    implementation project(':common')
+    implementation project(':framework')
+}

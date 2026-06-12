@@ -1,0 +1,7 @@
+spring:
+  profiles:
+    active: "dev"
+    group:
+      "dev": "framework-dev, security-dev, call-api-dev, server, mail, sms, dev"
+      "test": "framework-test, security-test, call-api-test, server, mail, sms, test"
+      "prod": "framework-prod, security-prod, call-api-prod, server, mail, sms, prod"

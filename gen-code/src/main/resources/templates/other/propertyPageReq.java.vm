@@ -1,0 +1,10 @@
+#parse("templates/other/propertyExample.java.vm")
+#if(${field.type.toLowerCase().contains("varchar")})
+    @ApiModelProperty(value = "${field.comment}", example = "${fieldDefValueMap.get(${field.propertyName})}")
+#else
+    @ApiModelProperty(value = "${field.comment}", example = "${Example}")
+#end
+#if(${field.propertyType.equals("Date")})
+    @DateTimeFormat(pattern = DateConstant.DEFAULT_PATTERN)
+#end
+#parse("templates/other/propertyType.java.vm")

@@ -1,0 +1,39 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import ${package.Entity}.${servicePackage}.${entity};
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import javax.validation.constraints.Min;
+
+/**
+ * $!{tableComment} 修改请求类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@ApiModel(value = "${tableComment}修改请求")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ${entity}EditReq extends ${entity}BaseReq {
+#foreach($field in ${table.fields})
+    #if(${field.keyFlag})
+
+    #parse("templates/other/propertyReq.java.vm")
+    #end
+#end
+
+    @Override
+    public ${entity} toEntity() {
+        return super.toEntity()
+        #foreach($field in $table.fields)
+            #if (${field.keyFlag})
+                #set($SetMethod = ${field.propertyName.substring(0, 1).toUpperCase()} + ${field.propertyName.substring(1)})
+                .set$SetMethod(${field.propertyName});
+            #end
+        #end
+    }
+
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysNoticeMapper">
+
+    <select id="pageSysNotice" resultType="com.gk.framework.model.dto.system.sysNotice.SysNoticePageResp">
+        SELECT sn.id,
+        sn.notice_title,
+        sn.notice_type,
+        sn.data_status,
+        sn.notice_start_time,
+        sn.notice_end_time,
+        sn.notice_top,
+        sn.create_by,
+        sn.create_time,
+        su.username AS creator_username,
+        su.nickname AS creator_nickname
+        FROM sys_notice sn
+        INNER JOIN sys_user su ON sn.create_by = su.id
+        WHERE sn.enabled = '1'
+        <if test="req.isSuperAdmin != null and req.isSuperAdmin == 0">
+            AND sn.create_by IN (${req.userIdColl})
+        </if>
+        <if test="req.noticeTitle != null and req.noticeTitle != ''">
+            AND sn.notice_title LIKE CONCAT(#{req.noticeTitle},'%')
+        </if>
+        <if test="req.noticeType != null and req.noticeType != ''">
+            AND sn.notice_type = #{req.noticeType}
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND sn.data_status = #{req.dataStatus}
+        </if>
+        <if test="req.noticeScope != null and req.noticeScope != ''">
+            AND sn.notice_scope = #{req.noticeScope}
+        </if>
+        <if test="req.noticeTop != null and req.noticeTop != ''">
+            AND sn.notice_top = #{req.noticeTop}
+        </if>
+        <if test="req.creator != null and req.creator != ''">
+            AND (su.username LIKE CONCAT(#{req.creator},'%') OR su.nickname LIKE CONCAT(#{req.creator},'%'))
+        </if>
+        ORDER BY sn.notice_top DESC, sn.id DESC
+    </select>
+
+    <select id="pageSysUserNotice" resultType="com.gk.framework.model.dto.system.sysNotice.UserNoticePageResp" databaseId="mysql">
+        SELECT sn.id,
+        sn.notice_title,
+        sn.notice_type,
+        sn.notice_top,
+        sn.create_time,
+        su.username AS creator_username,
+        su.nickname AS creator_nickname
+        FROM sys_notice sn
+        INNER JOIN sys_user su ON sn.create_by = su.id
+        WHERE sn.enabled = '1'
+        AND sn.data_status = '1'
+        AND #{req.currentTime} BETWEEN sn.notice_start_time AND sn.notice_end_time
+        AND (sn.notice_scope = '1' OR (sn.notice_scope = '2' AND sn.dept_id IN (${req.parentDeptIdColl})) OR (sn.notice_scope = '3' AND sn.dept_id = #{req.currentDeptId}))
+        <if test="req.noticeTitle != null and req.noticeTitle != ''">
+            AND sn.notice_title LIKE CONCAT(#{req.noticeTitle},'%')
+        </if>
+        <if test="req.noticeType != null and req.noticeType != ''">
+            AND sn.notice_type = #{req.noticeType}
+        </if>
+        ORDER BY sn.notice_top DESC, sn.id DESC
+    </select>
+
+    <select id="pageSysUserNotice" resultType="com.gk.framework.model.dto.system.sysNotice.UserNoticePageResp" databaseId="oracle">
+        SELECT sn.id,
+        sn.notice_title,
+        sn.notice_type,
+        sn.notice_top,
+        sn.create_time,
+        su.username AS creator_username,
+        su.nickname AS creator_nickname
+        FROM sys_notice sn
+        INNER JOIN sys_user su ON sn.create_by = su.id
+        WHERE sn.enabled = '1'
+        AND sn.data_status = '1'
+        AND TO_DATE(#{req.currentTime}, 'yyyy-mm-dd hh24:mi:ss') BETWEEN sn.notice_start_time AND sn.notice_end_time
+        AND (sn.notice_scope = '1' OR (sn.notice_scope = '2' AND sn.dept_id IN (${req.parentDeptIdColl})) OR (sn.notice_scope = '3' AND sn.dept_id = #{req.currentDeptId}))
+        <if test="req.noticeTitle != null and req.noticeTitle != ''">
+            AND sn.notice_title LIKE CONCAT(#{req.noticeTitle},'%')
+        </if>
+        <if test="req.noticeType != null and req.noticeType != ''">
+            AND sn.notice_type = #{req.noticeType}
+        </if>
+        ORDER BY sn.notice_top DESC, sn.id DESC
+    </select>
+
+</mapper>

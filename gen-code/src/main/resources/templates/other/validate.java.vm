@@ -1,0 +1,19 @@
+#if(${field.propertyType.equals("String")})
+    #set($FieldComment = ${fieldCommentMap.get(${field.propertyName})})
+    @NotBlank(message = "${FieldComment}不能为空")
+    #if(${field.type.toLowerCase().contains("varchar")})
+        #set($FieldLength = ${field.metaInfo.length})
+    @Length(max = ${FieldLength}, message = "${FieldComment}最多输入${FieldLength}个字符")
+    #end
+#elseif(${field.propertyType.equals("Long")})
+    #if(${field.propertyName.toLowerCase().contains("id")})
+        #set($MinValue = 1000000000000000001)
+    #else
+        #set($MinValue = 100)
+    #end
+    @Min(value = ${MinValue}L, message = "id不合法")
+#elseif(${field.propertyType.equals("Integer")})
+    @Min(value = 1, message = "${field.comment}不合法")
+#else
+    @NotNull(message = "${field.comment}不能为空")
+#end

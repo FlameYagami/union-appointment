@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysOperateLogMapper">
+
+    <select id="pageSysOperateLog" resultType="com.gk.framework.model.dto.system.sysOperateLog.SysOperateLogPageResp" databaseId="mysql">
+        SELECT sol.id,
+        sol.dept_id,
+        sol.title,
+        sol.request_method,
+        sol.type,
+        sol.ip,
+        sol.status,
+        sol.create_time,
+        su.username as creator_username,
+        su.nickname as creator_nickname
+        FROM sys_operate_log sol
+        INNER JOIN sys_user su ON sol.create_by = su.id
+        WHERE sol.enabled = '1'
+        <if test="req.creator != null and req.creator != ''">
+            AND (su.username LIKE CONCAT(#{req.creator},'%') OR su.nickname LIKE CONCAT(#{req.creator},'%'))
+        </if>
+        <if test="req.title != null and req.title != ''">
+            AND sol.title LIKE CONCAT(#{req.title},'%')
+        </if>
+        <if test="req.requestUrl != null and req.requestUrl != ''">
+            AND sol.request_url LIKE CONCAT(#{req.requestUrl},'%')
+        </if>
+        <if test="req.requestMethod != null and req.requestMethod != ''">
+            AND sol.request_method = #{req.requestMethod}
+        </if>
+        <if test="req.type != null and req.type != ''">
+            AND sol.type = #{req.type}
+        </if>
+        <if test="req.status != null and req.status != ''">
+            AND sol.status = #{req.status}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND sol.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY sol.id DESC
+    </select>
+
+    <select id="pageSysOperateLog" resultType="com.gk.framework.model.dto.system.sysOperateLog.SysOperateLogPageResp" databaseId="oracle">
+        SELECT sol.id,
+        sol.dept_id,
+        sol.title,
+        sol.request_method,
+        sol.type,
+        sol.ip,
+        sol.status,
+        sol.create_time,
+        su.username as creator_username,
+        su.nickname as creator_nickname
+        FROM sys_operate_log sol
+        INNER JOIN sys_user su ON sol.create_by = su.id
+        WHERE sol.enabled = '1'
+        <if test="req.creator != null and req.creator != ''">
+            AND (su.username LIKE CONCAT(#{req.creator},'%') OR su.nickname LIKE CONCAT(#{req.creator},'%'))
+        </if>
+        <if test="req.title != null and req.title != ''">
+            AND sol.title LIKE CONCAT(#{req.title},'%')
+        </if>
+        <if test="req.requestUrl != null and req.requestUrl != ''">
+            AND sol.request_url LIKE CONCAT(#{req.requestUrl},'%')
+        </if>
+        <if test="req.requestMethod != null and req.requestMethod != ''">
+            AND sol.request_method = #{req.requestMethod}
+        </if>
+        <if test="req.type != null and req.type != ''">
+            AND sol.type = #{req.type}
+        </if>
+        <if test="req.status != null and req.status != ''">
+            AND sol.status = #{req.status}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND sol.create_time BETWEEN TO_DATE(#{req.startTime}, 'yyyy-mm-dd hh24:mi:ss') AND TO_DATE(#{req.endTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY sol.id DESC
+    </select>
+
+</mapper>

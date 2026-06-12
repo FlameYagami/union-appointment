@@ -1,0 +1,37 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import ${package.Entity}.${servicePackage}.${entity};
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+#parse("templates/other/import.java.vm")
+
+/**
+ * $!{tableComment} 基础请求类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@Data
+public class ${entity}BaseReq {
+#foreach($field in $table.fields)
+    #if(!${field.keyFlag})
+
+    #parse("templates/other/propertyReq.java.vm")
+    #end
+#end
+
+    /**
+    * 转换成数据库操作类
+    */
+    protected ${entity} toEntity() {
+        return new ${entity}()
+        #foreach($field in $table.fields)
+            #if (!${field.keyFlag})
+                #set($SetMethod = ${field.propertyName.substring(0, 1).toUpperCase()} + ${field.propertyName.substring(1)})
+                .set$SetMethod(${field.propertyName})#if(!${foreach.hasNext});#end
+            #end
+        #end
+    }
+
+}

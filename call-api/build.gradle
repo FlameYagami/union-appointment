@@ -1,0 +1,9 @@
+group 'com.gk.call-api'
+description '对接平台模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    implementation project(':common')
+}

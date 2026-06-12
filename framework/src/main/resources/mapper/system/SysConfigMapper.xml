@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysConfigMapper">
+
+    <sql id="pageSysConfigSql">
+        FROM sys_config t
+        WHERE t.enabled = '1'
+        <if test="req.configName != null and req.configName != ''">
+            AND t.config_name LIKE CONCAT(#{req.configName},'%')
+        </if>
+        <if test="req.configKey != null and req.configKey != ''">
+            AND t.config_key LIKE CONCAT(#{req.configKey},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND t.data_status = #{req.dataStatus}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND t.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test='"${oracleExportLimit}" != "\${oracleExportLimit}"'>
+            <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimitOracle"/>
+        </if>
+        ORDER BY t.id DESC
+    </sql>
+
+    <select id="pageSysConfig" resultType="com.gk.framework.model.dto.system.sysConfig.SysConfigPageResp">
+        SELECT t.id, t.config_name, t.config_key, t.config_value, t.system_data, t.data_status, t.remark, t.create_time
+        <include refid="pageSysConfigSql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="exportSysConfig" resultType="com.gk.framework.model.dto.system.sysConfig.SysConfigExportResp" databaseId="mysql">
+        SELECT t.config_name, t.config_key, t.config_value, t.data_status, t.remark, t.create_time
+        <include refid="pageSysConfigSql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"></include>
+    </select>
+
+    <select id="exportSysConfig" resultType="com.gk.framework.model.dto.system.sysConfig.SysConfigExportResp" databaseId="oracle">
+        SELECT t.config_name, t.config_key, t.config_value, t.data_status, t.remark, t.create_time
+        <include refid="pageSysConfigSql">
+            <property name="req" value="${req}"/>
+            <property name="oracleExportLimit" value="1"/>
+        </include>
+    </select>
+
+</mapper>

@@ -1,0 +1,26 @@
+package ${package.Other}.${servicePackage}.${table.entityPath};
+
+import com.gk.common.model.dto.PageDateReq;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+#parse("templates/other/import.java.vm")
+
+/**
+ * $!{tableComment} 分页请求类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+@ApiModel(value = "${tableComment}分页请求")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ${entity}PageReq extends PageDateReq {
+#foreach($field in ${table.fields})
+    #if (!${field.keyFlag})
+
+        #parse("templates/other/propertyPageReq.java.vm")
+    #end
+#end
+}

@@ -1,0 +1,81 @@
+package ${package.Service}.${servicePackage};
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}AddReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}EditReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}Resp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportResp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageResp;
+import ${package.Entity}.${servicePackage}.${entity};
+
+import java.util.*;
+
+/**
+ * $!{table.comment} 服务接口类
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+public interface ${table.serviceName} extends IService<${entity}> {
+## 主键类型判断
+#foreach($field in ${table.fields})
+    #if(${field.keyFlag})
+## 主键类型
+        #set($idType=${field.propertyType})
+## 主键名称
+        #set($idName=${field.propertyName})
+## 跳出
+        #break
+    #end
+#end
+
+    /**
+     * 分页查询
+     *
+     * @param req 查询条件
+     * @return 分页列表
+     */
+    IPage<${entity}PageResp> pageList(${entity}PageReq req);
+
+    /**
+     * 全表导出
+     *
+     * @param req 查询条件
+     * @return 全表数据
+     */
+    List<${entity}ExportResp> exportList(${entity}ExportReq req);
+
+    /**
+     * 新增
+     *
+     * @param req 请求类
+     * @return 主键id
+     */
+    long add(${entity}AddReq req);
+
+    /**
+     * 修改
+     *
+     * @param req 请求类
+     */
+    void edit(${entity}EditReq req);
+
+    /**
+     * 删除
+     *
+     * @param idList 主键id集合
+     */
+    void delete(List<${idType}> idList);
+
+    /**
+     * 单个查询
+     *
+     * @param id 主键id
+     * @return 响应类
+     */
+    ${entity}Resp findOne(long id);
+
+}

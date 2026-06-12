@@ -1,0 +1,19 @@
+group 'com.gk.common'
+description '通用模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    api "com.github.xiaoymin:knife4j-spring-boot-starter:${knife4jVerison}" // 接口文档
+
+    api "cn.hutool:hutool-all:${hutoolVersion}"
+    api "com.alibaba:easyexcel:${easyExcelVersion}"
+    api "com.lmax:disruptor:${disruptorVersion}" // 日志扩展组件
+
+    api "com.squareup.okhttp3:okhttp:${okhttpVersion}"
+    api "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+
+    api "tech.powerjob:powerjob-worker-spring-boot-starter:${powerJobVersion}"
+    api "org.lionsoul:ip2region:${ipRegionVersion}" // 离线ip库
+}

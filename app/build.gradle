@@ -1,0 +1,13 @@
+apply from: 'boot.gradle'
+
+group 'com.gk.app'
+description '打包模块'
+
+dependencies {
+    implementation project(':common')
+    implementation project(':framework')
+    implementation project(':security')
+    implementation project(':server')
+    implementation project(':open-api')
+    implementation project(':call-api')
+}

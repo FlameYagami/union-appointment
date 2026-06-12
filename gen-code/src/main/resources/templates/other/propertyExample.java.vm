@@ -1,0 +1,15 @@
+#if(${field.propertyType.equals("Long")})
+    #if(${field.propertyName.toLowerCase().contains("id")})
+        #set($Example = "1000000000000000001")
+    #else
+        #set($Example = "100")
+    #end
+#elseif(${field.propertyType.equals("Integer")})
+    #set($Example = "100")
+#elseif(${field.propertyType.equals("BigDecimal")})
+    #set($Example = "10.00")
+#elseif(${field.propertyType.equals("Date")})
+        #set($Example = "2000-01-31 23:59:59")
+    #else
+        #set($Example = "${field.comment}")
+#end

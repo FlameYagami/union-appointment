@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysUserMapper">
+
+    <select id="findSysUserExt" resultType="com.gk.framework.model.bo.system.sysUser.SysUserExt" databaseId="mysql">
+        SELECT su.id,
+               su.username,
+               su.password,
+               su.password_changed,
+               su.nickname,
+               su.data_status,
+               GROUP_CONCAT(DISTINCT sd.dept_name) AS dept_names,
+               GROUP_CONCAT(DISTINCT sr.role_name) AS role_names,
+               su.create_time
+        FROM sys_user su
+        LEFT JOIN sys_user_dept sud ON su.id = sud.user_id AND sud.enabled = '1'
+        LEFT JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1' AND sd.data_status = '1'
+        LEFT JOIN sys_user_role sur ON su.id = sur.user_id AND sur.enabled = '1'
+        LEFT JOIN sys_role sr ON sur.role_id = sr.id AND sr.enabled = '1' AND sr.data_status = '1'
+        WHERE su.enabled = '1'
+          AND su.id = #{userId}
+    </select>
+
+    <select id="findSysUserExt" resultType="com.gk.framework.model.bo.system.sysUser.SysUserExt" databaseId="oracle">
+        SELECT su.id,
+               su.username,
+               su.password,
+               su.password_changed,
+               su.nickname,
+               su.data_status,
+               t1.dept_names,
+               t2.role_names,
+               su.create_time
+        FROM sys_user su
+        INNER JOIN (SELECT ta.user_id, LISTAGG(ta.dept_name, ',') WITHIN GROUP (ORDER BY ta.dept_name) AS dept_names
+                    FROM (SELECT DISTINCT sud.user_id, sd.dept_name
+                          FROM sys_user_dept sud
+                          INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1' AND sd.data_status = '1'
+                          WHERE sud.enabled = '1') ta
+                    GROUP BY ta.user_id) t1 ON su.id = t1.user_id
+        INNER JOIN (SELECT ta.user_id, LISTAGG(ta.role_name, ',') WITHIN GROUP (ORDER BY ta.role_name) AS role_names
+                    FROM (SELECT DISTINCT sur.user_id, sr.role_name
+                          FROM sys_user_role sur
+                          INNER JOIN sys_role sr ON sur.role_id = sr.id AND sr.enabled = '1' AND sr.data_status = '1'
+                          WHERE sur.enabled = '1') ta
+                    GROUP BY ta.user_id) t2 ON su.id = t2.user_id
+        WHERE su.enabled = '1'
+          AND su.id = #{userId}
+    </select>
+
+</mapper>

@@ -1,0 +1,114 @@
+# Spring配置
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 网页监控拦截
+      webStatFilter:
+        enabled: true
+      # 配置druid内置监控页面
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: root
+        login-password: admin@123456
+    dynamic:
+      druid:
+        # 初始连接数
+        initialSize: 5
+        # 最小连接池数量
+        minIdle: 10
+        # 最大连接池数量
+        maxActive: 100
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置一个连接在池中最小生存的时间，单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        # 配置一个连接在池中最大生存的时间，单位是毫秒
+        maxEvictableIdleTimeMillis: 900000
+        # 配置检测连接是否有效
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        filters: stat,wall  # 启用内置过滤器（stat必须，否则监控不到SQL）
+        # 对配置已开启的 filters 即 stat(sql 监控)wall（防火墙）
+        filter:
+          # 配置StatFilter(SQL监控配置)
+          stat:
+            enabled: true # 开启SQL监控
+            log-slow-sql: true # 记录慢查询SQL
+            slow-sql-millis: 3000 # 慢SQL记录
+            merge-sql: true
+          # 配置WallFilter(防火墙配置)
+          wall:
+            enabled: true # 开启防火墙
+            config:
+              update-allow: true # 允许更新操作
+              insert-allow: true # 允许插入操作
+              drop-table-allow: false # 禁止删表操作
+              delete-allow: false # 禁止删除操作
+              multi-statement-allow: true # 支持一次执行多条SQL
+
+  # 文件上传
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 20MB
+      # 请求总上传的文件大小
+      max-request-size: 50MB
+
+  # 服务模块
+#  devtools:
+#    restart:
+#      # 热部署开关
+#      enabled: true
+
+  # knife4j与springboot高版本适配配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+# MyBatis Plus配置
+mybatis-plus:
+  # 搜索指定包别名
+  typeAliasesPackage: com.gk.**.model
+  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  # 加载全局的配置文件
+  configuration:
+    map-underscore-to-camel-case: true
+    jdbc-type-for-null: null
+  global-config:
+    db-config:
+      id-type: assign_id
+
+# 防止XSS攻击
+xss:
+  # 过滤开关
+  enabled: true
+  # 排除链接（多个用逗号分隔）
+  excludes: /system/notice
+  # 匹配链接
+  urlPatterns: /system/*,/monitor/*,/tool/*
+
+# 异步线程配置
+async:
+  executor:
+    thread:
+      # 配置核心线程数
+      core_pool_size: 8
+      # 配置最大线程数
+      max_pool_size: 16
+      # 配置队列大小
+      queue_capacity: 1000
+      # 配置线程池中线程的最大空闲时间
+      keepAliveSeconds: 100
+      # 配置线程池中的线程的名称前缀
+      name:
+        prefix: thread-async-

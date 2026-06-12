@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysUserRoleMapper">
+
+    <select id="pageSysRoleUser" resultType="com.gk.framework.model.dto.system.sysUserRole.SysUserRolePageResp" databaseId="mysql">
+        SELECT su.id,
+        su.username,
+        su.nickname,
+        sui.telephone,
+        su.data_status,
+        GROUP_CONCAT(sd.dept_name) AS dept_names,
+        su.create_time
+        FROM sys_user_role sur
+        INNER JOIN sys_user su ON sur.user_id = su.id AND su.enabled = '1'
+        INNER JOIN sys_user_info sui ON sui.user_id = su.id
+        INNER JOIN sys_user_dept sud ON su.id = sud.user_id AND sud.enabled = '1'
+        INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1'
+        WHERE sur.enabled = '1'
+        AND sur.role_id = #{req.roleId}
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        GROUP BY su.id
+        ORDER BY su.id DESC
+    </select>
+
+    <!-- 需要调整, 调整后删除注释 -->
+    <select id="pageSysRoleUser" resultType="com.gk.framework.model.dto.system.sysUserRole.SysUserRolePageResp" databaseId="oracle">
+        SELECT DISTINCT su.id,
+        su.username,
+        su.nickname,
+        su.telephone,
+        su.data_status,
+        su.create_time,
+        t1.dept_names
+        FROM sys_user_role sur
+        INNER JOIN sys_user su ON sur.user_id = su.id AND su.enabled = '1'
+        INNER JOIN (SELECT ta.user_id, LISTAGG(ta.dept_name, ',') WITHIN GROUP (ORDER BY ta.dept_name) AS dept_names
+                    FROM (SELECT DISTINCT sud.user_id, sd.dept_name
+                        FROM sys_user_dept sud
+                        INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1' AND sd.data_status = '1'
+                    WHERE sud.enabled = '1') ta
+                    GROUP BY ta.user_id) t1 ON su.id = t1.user_id
+        WHERE sur.enabled = '1'
+        AND sur.role_id = #{req.roleId}
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        ORDER BY su.id DESC
+    </select>
+
+    <select id="pageSysRoleUserAdd" resultType="com.gk.framework.model.dto.system.sysUserRole.SysUserRoleAddPageResp" databaseId="mysql">
+        SELECT DISTINCT su.id,
+        su.username,
+        su.nickname,
+        sui.telephone,
+        su.data_status,
+        GROUP_CONCAT(DISTINCT sd.dept_name) AS dept_names,
+        su.create_time
+        FROM sys_user su
+        INNER JOIN sys_user_info sui ON sui.user_id = su.id
+        INNER JOIN sys_user_dept sud ON su.id = sud.user_id AND sud.enabled = '1'
+        INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1'
+        WHERE su.enabled = '1'
+        AND su.id > 1000000000000000001
+        AND su.id NOT IN (SELECT tsur.user_id FROM sys_user_role tsur WHERE tsur.enabled = '1' AND tsur.role_id = #{req.roleId} GROUP BY tsur.user_id)
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        GROUP BY su.id
+        ORDER BY su.id DESC
+    </select>
+
+    <!-- 需要调整, 调整后删除注释 -->
+    <select id="pageSysRoleUserAdd" resultType="com.gk.framework.model.dto.system.sysUserRole.SysUserRoleAddPageResp" databaseId="oracle">
+        SELECT DISTINCT su.id,
+        su.username,
+        su.nickname,
+        su.telephone,
+        su.data_status,
+        su.create_time,
+        t1.dept_names
+        FROM sys_user su
+        INNER JOIN (SELECT ta.user_id, LISTAGG(ta.dept_name, ',') WITHIN GROUP (ORDER BY ta.dept_name) AS dept_names
+            FROM (SELECT DISTINCT sud.user_id, sd.dept_name
+                FROM sys_user_dept sud
+                INNER JOIN sys_dept sd ON sud.dept_id = sd.id AND sd.enabled = '1' AND sd.data_status = '1'
+                WHERE sud.enabled = '1') ta
+            GROUP BY ta.user_id) t1 ON su.id = t1.user_id
+        WHERE su.enabled = '1'
+        AND su.id > 1000000000000000001
+        AND su.id NOT IN (SELECT tsur.user_id FROM sys_user_role tsur WHERE tsur.enabled = '1' AND tsur.role_id = #{req.roleId} GROUP BY tsur.user_id)
+        <if test="req.username != null and req.username != ''">
+            AND su.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND su.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY su.id DESC
+    </select>
+
+    <select id="getEnableRoleIdByUserId" resultType="java.lang.Long">
+        SELECT sur.role_id
+        FROM sys_user_role sur
+        INNER JOIN sys_role sr ON sur.role_id = sr.id AND sr.enabled = '1' AND sr.data_status = '1'
+        WHERE sur.enabled = '1'
+        AND sur.user_id = #{userId}
+    </select>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.framework.mapper.system.SysOpenConfigMapper">
+
+    <select id="pageSysOpenConfig" resultType="com.gk.framework.model.dto.system.sysOpenConfig.SysOpenConfigPageResp">
+        SELECT soc.id,
+        soc.company_name,
+        soc.open_id,
+        soc.aes_key,
+        soc.aes_iv,
+        soc.data_status,
+        soc.create_time
+        FROM sys_open_config soc
+        WHERE soc.enabled = '1'
+        <if test="req.companyName != null and req.companyName != ''">
+            AND soc.company_name LIKE CONCAT(#{req.companyName},'%')
+        </if>
+        <if test="req.dataStatus != null and req.dataStatus != ''">
+            AND soc.data_status = #{req.dataStatus}
+        </if>
+        ORDER BY soc.id DESC
+    </select>
+
+</mapper>

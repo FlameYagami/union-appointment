@@ -1,0 +1,11 @@
+group 'com.gk.framework'
+description '框架模块'
+
+jar.enabled = true
+bootJar.enabled = false
+
+dependencies {
+    implementation project(':common')
+
+    implementation "org.apache.velocity:velocity-engine-core:2.3"
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${package.Mapper}.${servicePackage}.${table.mapperName}">
+    #set($pageFields="")
+    #set($exportFields="")
+    ## 主键类型判断
+    #foreach($field in ${table.fields})
+        #if(${field.keyFlag})
+            ## 主键名称
+            #set($idName=${field.columnName})
+            #set($pageFields=$pageFields+"${tableAbbr}."+${field.columnName}+",")
+        #else
+            #set($pageFields=$pageFields+"${tableAbbr}."+${field.columnName}+",")
+            #set($exportFields=$exportFields+"${tableAbbr}."+${field.columnName}+",")
+        #end
+    #end
+    #set($pageFields=$pageFields.substring(0,$pageFields.lastIndexOf(',')))
+    #set($exportFields=$exportFields.substring(0,$exportFields.lastIndexOf(',')))
+
+    <sql id="page${entity}Sql">
+        FROM ${table.name} ${tableAbbr}
+        WHERE ${tableAbbr}.enabled = '1'
+        #foreach($field in ${table.fields})
+            #if (!${field.keyFlag})
+                #parse("templates/other/mapperPageReq.xml.vm")
+            #end
+        #end
+        <if test="req.startTime != null and req.endTime != null">
+            AND ${tableAbbr}.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY ${tableAbbr}.${idName} DESC
+    </sql>
+
+    <select id="page${entity}" resultType="${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageResp" databaseId="mysql">
+        SELECT ${pageFields}
+        <include refid="page${entity}Sql">
+            <property name="req" value="${req}"/>
+        </include>
+    </select>
+
+    <select id="export${entity}" resultType="${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportResp" databaseId="mysql">
+        SELECT ${exportFields}
+        <include refid="page${entity}Sql">
+            <property name="req" value="${req}"/>
+        </include>
+        <include refid="com.gk.framework.mapper.CommonSqlMapper.exportLimit"/>
+    </select>
+
+</mapper>

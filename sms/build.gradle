@@ -1,0 +1,9 @@
+group 'com.gk.sms'
+description '短信模块'
+
+bootJar.enabled = false
+jar.enabled = true
+
+dependencies {
+    implementation project(':common')
+}

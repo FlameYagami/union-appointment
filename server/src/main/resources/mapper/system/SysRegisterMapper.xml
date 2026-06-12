@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.system.SysRegisterMapper">
+
+    <select id="pageSysRegister" resultType="com.gk.server.model.dto.system.sysRegister.SysRegisterPageResp" databaseId="mysql">
+        SELECT sr.id,
+               sr.user_type,
+               sr.username,
+               sr.nickname,
+               sr.telephone,
+               sr.review_status,
+               sr.review_time,
+               sr.create_time
+        FROM sys_register sr
+        WHERE sr.enabled = '1'
+        <if test="req.userType != null and req.userType != ''">
+            AND sr.user_type = #{req.userType}
+        </if>
+        <if test="req.username != null and req.username != ''">
+            AND sr.username LIKE CONCAT(#{req.username},'%')
+        </if>
+        <if test="req.nickname != null and req.nickname != ''">
+            AND sr.nickname LIKE CONCAT(#{req.nickname},'%')
+        </if>
+        <if test="req.telephone != null and req.telephone != ''">
+            AND sr.telephone = #{req.telephone}
+        </if>
+        <if test="req.reviewStatus != null and req.reviewStatus != ''">
+            AND sr.review_status = #{req.reviewStatus}
+        </if>
+        <if test="req.startTime != null and req.endTime != null">
+            AND sr.create_time BETWEEN #{req.startTime} AND #{req.endTime}
+        </if>
+        ORDER BY sr.id DESC
+    </select>
+
+</mapper>

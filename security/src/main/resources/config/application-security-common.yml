@@ -1,0 +1,36 @@
+# SecurityConfig配置
+security-config:
+  # 匿名访问配置(前三项为knife4j需要的默认配置，不可去除)
+  anonymous:
+    - /webjars/**
+    - /*/api-docs
+    - /swagger-resources/**
+    - /api/sys-login/login
+    - /api/sys-login/pub-config
+    - /api/captcha/get
+    - /api/captcha/check
+    - /api/sys-register/register # 注册接口
+    - /api/sys-register/register-status # 注册状态接口
+    - /druid/** # Druid监控接口
+    - /demo/** # 示例接口
+  # 任意访问配置
+  permitAll:
+    - /
+    - /*.html
+    - /**/*.html
+    - /**/*.css
+    - /**/*.js
+
+# 滑动验证码配置
+captcha:
+  blockPuzzlePath: classpath:images/blockPuzzle   # 滑动验证码的底图及滑块路径
+  clickWordPath: classpath:images/clickWord  # 点选文字验证码的底图路径
+  captchaType: blockPuzzle  # blockPuzzle:滑动验证码 / clickWord:点选文字验证码
+  watermark: 工会预约管理系统  # 水印文字
+  slipOffset: 5   # 校验滑动拼图允许误差偏移量(默认5像素)
+  interferenceOptions: 2  # 干扰项(0/1/2)
+  reqLimit: true  # 接口请求次数一分钟限制是否开启 true|false
+  reqGetLockLimit: 10   # 验证失败次数限制，超过限制则 get接口 锁定
+  reqGetLockDuration: 300   # 验证失败后，锁定时间间隔
+  reqGetMinuteLimit: 20  # get接口一分钟内请求数限制
+  reqCheckMinuteLimit: 20  # check接口一分钟内请求数限制

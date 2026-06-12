@@ -1,0 +1,76 @@
+// 替换配置文件方法
+def replaceActiveProfile(String active) {
+    def file = new File("${buildDir.path}/resources/main/application.yml")
+    def profile = ""
+    file.eachLine { line ->
+        if (line.contains("active:")) {
+            line = line.split(":")[0] + ": \"${active}\""
+            profile += line + "\r\n"
+        }
+        if (!line.contains("active:")) {
+            profile += line + "\r\n"
+        }
+    }
+    file.newWriter("UTF-8", false).with {
+        it.write(profile)
+        it.flush()
+        it.close()
+    }
+}
+
+// 恢复开发环境任务
+tasks.register('recoveryDevTask') {
+    doFirst {
+        activeProfile = "dev"
+        replaceActiveProfile("dev")
+    }
+}
+
+// 打包测试环境任务
+tasks.register('bootTestJarTask') {
+    doFirst {
+        activeProfile = "test"
+        replaceActiveProfile("test")
+    }
+    finalizedBy bootJar
+    dependsOn("compileJava", "processResources", "classes")
+}
+
+// 打包测试环境
+tasks.register('bootTestJar') {
+    dependsOn bootTestJarTask
+    dependsOn recoveryDevTask
+    recoveryDevTask.mustRunAfter bootTestJarTask
+    group 'Build Jar'
+    description '打包测试环境'
+}
+
+// 打包正式环境任务
+tasks.register('bootProdJarTask') {
+    doFirst {
+        activeProfile = "prod"
+        replaceActiveProfile("prod")
+    }
+    finalizedBy bootJar
+    dependsOn("compileJava", "processResources", "classes")
+}
+
+// 打包正式环境
+tasks.register('bootProdJar') {
+    dependsOn bootProdJarTask
+    dependsOn recoveryDevTask
+    recoveryDevTask.mustRunAfter bootProdJarTask
+    group 'Build Jar'
+    description '打包正式环境'
+}
+
+// 打包环境标识的临时变量
+ext {
+    activeProfile = "default"
+}
+
+bootJar {
+    doFirst {
+        archiveFileName = "app_${rootProject.getVersion()}_${activeProfile}.jar"
+    }
+}

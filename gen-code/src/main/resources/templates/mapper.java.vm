@@ -1,0 +1,32 @@
+package ${package.Mapper}.${servicePackage};
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}ExportResp;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageReq;
+import ${package.Other}.${servicePackage}.${table.entityPath}.${entity}PageResp;
+import ${package.Entity}.${servicePackage}.${entity};
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+/**
+ * $!{table.comment} Mapper 接口
+ *
+ * @author ${author}
+ * @since ${date}
+ */
+
+public interface ${table.mapperName} extends BaseMapper<${entity}> {
+
+    /**
+     * 分页查询
+     */
+    IPage<${entity}PageResp> page${entity}(IPage<?> page, @Param("req") ${entity}PageReq req);
+
+    /**
+     * 全表导出
+     */
+    List<${entity}ExportResp> export${entity}(@Param("req") ${entity}ExportReq req);
+}
