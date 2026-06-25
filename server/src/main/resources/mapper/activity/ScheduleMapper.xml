@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.activity.ScheduleMapper">
+
+    <select id="pageSchedule" resultType="com.gk.server.model.entity.activity.Schedule">
+        SELECT
+        sch.id, sch.venue_id, sch.name, sch.schedule_date, sch.start_time, sch.end_time,
+        sch.max_count, sch.booked_count, sch.status, sch.remark,
+        sch.enabled, sch.create_time, sch.update_time
+        FROM act_schedule sch
+        INNER JOIN act_venue v ON sch.venue_id = v.id
+        WHERE sch.enabled = '1' AND v.enabled = '1'
+        <if test="req.venueId != null">
+            AND sch.venue_id = #{req.venueId}
+        </if>
+        <if test="req.name != null and req.name != ''">
+            AND sch.name LIKE CONCAT('%', #{req.name}, '%')
+        </if>
+        <if test="req.scheduleDate != null and req.scheduleDate != ''">
+            AND sch.schedule_date = #{req.scheduleDate}
+        </if>
+        <if test="req.status != null and req.status != ''">
+            AND sch.status = #{req.status}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY sch.schedule_date ASC, sch.start_time ASC, sch.id DESC
+    </select>
+
+    <update id="updateBookedCount">
+        UPDATE act_schedule
+        SET booked_count = booked_count + #{count}
+        WHERE id = #{scheduleId}
+    </update>
+
+</mapper>

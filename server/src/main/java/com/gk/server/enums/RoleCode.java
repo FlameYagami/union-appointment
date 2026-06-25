@@ -30,6 +30,11 @@ public enum RoleCode {
     SYSTEM_ADMIN(SysRoleCode.SYSTEM_ADMIN),
 
     /**
+     * 活动资源管理员
+     */
+    ACTIVITY_ADMIN(SysRoleCode.ACTIVITY_ADMIN),
+
+    /**
      * 普通用户
      */
     STAFF(SysRoleCode.STAFF);

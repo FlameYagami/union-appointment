@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.activity.AppointmentBlacklistMapper">
+
+    <select id="pageBlacklist" resultType="com.gk.server.model.entity.activity.AppointmentBlacklist">
+        SELECT
+        ab.id, ab.user_id, ab.user_name, ab.dept_id, ab.violate_count, ab.status,
+        ab.reason, ab.expire_time, ab.remark, ab.enabled, ab.create_time, ab.update_time
+        FROM act_blacklist ab
+        WHERE ab.enabled = '1'
+        <if test="req.userId != null">
+            AND ab.user_id = #{req.userId}
+        </if>
+        <if test="req.userName != null and req.userName != ''">
+            AND ab.user_name LIKE CONCAT('%', #{req.userName}, '%')
+        </if>
+        <if test="req.status != null and req.status != ''">
+            AND ab.status = #{req.status}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY ab.create_time DESC, ab.id DESC
+    </select>
+
+    <select id="selectExists" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM act_blacklist ab
+        WHERE ab.enabled = '1'
+        AND ab.user_id = #{userId}
+        AND ab.status = '1'
+        AND (ab.expire_time IS NULL OR ab.expire_time > NOW())
+    </select>
+
+</mapper>

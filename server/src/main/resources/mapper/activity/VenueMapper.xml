@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.activity.VenueMapper">
+
+    <select id="pageVenue" resultType="com.gk.server.model.entity.activity.Venue">
+        SELECT
+        av.id, av.name, av.venue_type, av.description, av.location, av.max_capacity,
+        av.equipment, av.contact, av.require_approval, av.reserve_rule, av.images,
+        av.remark, av.order_num, av.enabled, av.create_time, av.update_time
+        FROM act_venue av
+        WHERE av.enabled = '1'
+        <if test="req.name != null and req.name != ''">
+            AND av.name LIKE CONCAT('%', #{req.name}, '%')
+        </if>
+        <if test="req.venueType != null and req.venueType != ''">
+            AND av.venue_type = #{req.venueType}
+        </if>
+        <if test="req.enabled != null and req.enabled != ''">
+            AND av.enabled = #{req.enabled}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY av.order_num ASC, av.id DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.server.mapper.activity.AppointmentMapper">
+
+    <select id="pageAppointment" resultType="com.gk.server.model.entity.activity.Appointment">
+        SELECT
+        aa.id, aa.venue_id, aa.schedule_id, aa.user_id, aa.user_name, aa.dept_id,
+        aa.person_count, aa.status, aa.appointment_date, aa.time_slot, aa.phone,
+        aa.remark, aa.approve_by, aa.approve_time, aa.approve_remark,
+        aa.enabled, aa.create_time, aa.update_time
+        FROM act_appointment aa
+        INNER JOIN act_venue v ON aa.venue_id = v.id
+        INNER JOIN act_schedule sch ON aa.schedule_id = sch.id
+        WHERE aa.enabled = '1' AND v.enabled = '1' AND sch.enabled = '1'
+        <if test="req.venueId != null">
+            AND aa.venue_id = #{req.venueId}
+        </if>
+        <if test="req.scheduleId != null">
+            AND aa.schedule_id = #{req.scheduleId}
+        </if>
+        <if test="req.userId != null">
+            AND aa.user_id = #{req.userId}
+        </if>
+        <if test="req.userName != null and req.userName != ''">
+            AND aa.user_name LIKE CONCAT('%', #{req.userName}, '%')
+        </if>
+        <if test="req.status != null and req.status != ''">
+            AND aa.status = #{req.status}
+        </if>
+        <if test="req.appointmentDate != null and req.appointmentDate != ''">
+            AND aa.appointment_date = #{req.appointmentDate}
+        </if>
+        <if test="req.phone != null and req.phone != ''">
+            AND aa.phone = #{req.phone}
+        </if>
+        <if test="req.dataScopeSql != null and req.dataScopeSql != ''">
+            ${req.dataScopeSql}
+        </if>
+        ORDER BY aa.create_time DESC, aa.id DESC
+    </select>
+
+</mapper>

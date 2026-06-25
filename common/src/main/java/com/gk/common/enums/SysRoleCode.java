@@ -34,6 +34,11 @@ public enum SysRoleCode {
     QA_TEST("qa-test"),
 
     /**
+     * 活动资源管理员
+     */
+    ACTIVITY_ADMIN("activity-admin"),
+
+    /**
      * 普通用户
      */
     STAFF("staff");
