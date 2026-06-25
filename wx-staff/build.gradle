@@ -1,0 +1,12 @@
+group 'com.gk.wx-staff'
+description '职工移动端模块'
+
+bootJar.enabled = false
+jar.enabled = true
+
+dependencies {
+    implementation project(':common')
+    implementation project(':framework')
+    implementation project(':security')
+    implementation project(':server')
+}

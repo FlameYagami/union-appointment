@@ -10,4 +10,5 @@ dependencies {
     implementation project(':server')
     implementation project(':open-api')
     implementation project(':call-api')
+    implementation project(':wx-staff')
 }

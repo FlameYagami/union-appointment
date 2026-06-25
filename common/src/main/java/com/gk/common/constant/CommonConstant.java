@@ -20,12 +20,12 @@ public class CommonConstant {
     /**
      * 默认AES Key
      */
-    public static final String DEFAULT_AES_KEY = "cryptoAES@2022Az";
+    public static final String DEFAULT_AES_KEY = "JgWusXvC5fbofEac";
 
     /**
      * 默认AES iv
      */
-    public static final String DEFAULT_AES_IV = "9848918136515123";
+    public static final String DEFAULT_AES_IV = "E5qyLpVMwTF2nzw4";
 
     /**
      * 请求头Token令牌的Key

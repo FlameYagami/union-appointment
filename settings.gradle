@@ -14,3 +14,5 @@ include (':sms')
 include (':call-api')
 include (':open-api')
 
+include (':wx-staff')
+

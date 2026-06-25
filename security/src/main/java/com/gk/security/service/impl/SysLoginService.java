@@ -5,13 +5,18 @@ import com.gk.common.constant.CommonConstant;
 import com.gk.common.enums.ExceptionType;
 import com.gk.common.enums.OperateStatus;
 import com.gk.common.enums.SysStatus;
+import com.gk.common.enums.YesOrNo;
 import com.gk.common.model.exception.SysException;
 import com.gk.common.utils.IpUtils;
+import com.gk.common.utils.RsaUtils;
 import com.gk.common.utils.ServletExtUtils;
+import com.gk.framework.enums.SystemConfig;
+import com.gk.framework.helper.SysConfigHelper;
 import com.gk.framework.manager.RedisCacheManager;
 import com.gk.framework.model.bo.security.LoginUser;
 import com.gk.framework.service.intf.system.ISysExceptionLogService;
 import com.gk.framework.service.intf.system.ISysLoginLogService;
+import com.gk.security.model.dto.login.PubConfigResp;
 import com.gk.security.service.intf.IAuthTokenService;
 import com.gk.security.service.intf.ISysLoginService;
 import lombok.extern.slf4j.Slf4j;
@@ -96,6 +101,28 @@ public class SysLoginService implements ISysLoginService {
         }
 
         return token;
+    }
+
+    /**
+     * 获取公有配置(包含RSA公钥)
+     */
+    @Override
+    public PubConfigResp getPubConfig() {
+        String publicKey = RsaUtils.getPublicKey();
+        String cryptoEnabled = SysConfigHelper.getInstance().getString(SystemConfig.CRYPTO_ENABLE);
+        String captchaEnable = SysConfigHelper.getInstance().getString(SystemConfig.CAPTCHA_ENABLE);
+        String registerEnable = SysConfigHelper.getInstance().getString(SystemConfig.REGISTER_ENABLE);
+        String webWatermark = SysConfigHelper.getInstance().getString(SystemConfig.WEB_WATERMARK);
+        cryptoEnabled = StrUtil.isEmpty(cryptoEnabled) ? YesOrNo.NO.value : cryptoEnabled;
+        captchaEnable = StrUtil.isEmpty(captchaEnable) ? YesOrNo.YES.value : captchaEnable;
+        registerEnable = StrUtil.isEmpty(registerEnable) ? YesOrNo.NO.value : registerEnable;
+        webWatermark = StrUtil.isEmpty(webWatermark) ? YesOrNo.NO.value : webWatermark;
+        return new PubConfigResp()
+                .setCryptoKey(publicKey)
+                .setCryptoEnabled(cryptoEnabled)
+                .setCaptchaEnable(captchaEnable)
+                .setRegisterEnable(registerEnable)
+                .setWebWatermark(webWatermark);
     }
 
 }

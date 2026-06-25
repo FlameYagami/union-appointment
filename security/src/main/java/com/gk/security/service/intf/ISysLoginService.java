@@ -1,5 +1,7 @@
 package com.gk.security.service.intf;
 
+import com.gk.security.model.dto.login.PubConfigResp;
+
 /**
  * Description:
  * Date: 2022/11/30 11:31
@@ -17,5 +19,10 @@ public interface ISysLoginService {
      * @return Token令牌
      */
     String login(String username, String password, String aesKey, String aesIv);
+
+    /**
+     * 获取公有配置(包含RSA公钥)
+     */
+    PubConfigResp getPubConfig();
 
 }

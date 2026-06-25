@@ -11,6 +11,10 @@ security-config:
     - /api/captcha/check
     - /api/sys-register/register # 注册接口
     - /api/sys-register/register-status # 注册状态接口
+    - /api/wx-staff/login # 社区工作人员移动端注册接口
+    - /api/wx-staff/pub-config # 社区工作人员移动端公共配置接口
+    - /api/wx-staff/user/password/forget #社区工作人员移动端短信 忘记密码变更
+    - /api/wx-staff/sys-dict-data/list-dict # 社区工作人员移动端 字典项查询
     - /druid/** # Druid监控接口
     - /demo/** # 示例接口
   # 任意访问配置
