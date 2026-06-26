@@ -8,9 +8,11 @@ import com.gk.common.model.exception.SysException;
 import com.gk.common.utils.JsonUtils;
 import com.gk.framework.annotation.DataScope;
 import com.gk.server.enums.ServerStatus;
+import com.gk.server.mapper.activity.AppointmentMapper;
 import com.gk.server.mapper.activity.ScheduleMapper;
 import com.gk.server.mapper.activity.VenueMapper;
 import com.gk.server.model.dto.activity.*;
+import com.gk.server.model.entity.activity.Appointment;
 import com.gk.server.model.entity.activity.Schedule;
 import com.gk.server.model.entity.activity.Venue;
 import com.gk.server.service.intf.activity.IVenueService;
@@ -37,6 +39,9 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule> i
 
     @Resource
     private VenueMapper venueMapper;
+
+    @Resource
+    private AppointmentMapper appointmentMapper;
 
     @DataScope(bizTableAlias = "sch")
     @Override
@@ -99,10 +104,13 @@ public class ScheduleServiceImpl extends ServiceImpl<ScheduleMapper, Schedule> i
             throw new SysException(ServerStatus.SCHEDULE_NOT_FOUND);
         }
 
-        boolean hasAppointment = lambdaQuery()
-                .eq(Schedule::getId, id)
-                .exists();
-        if (hasAppointment) {
+        // 查询该排期是否有关联的有效预约记录
+        Long appointmentCount = appointmentMapper.selectCount(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Appointment>()
+                        .eq(Appointment::getScheduleId, id)
+                        .eq(Appointment::getEnabled, EnabledType.ENABLE.value)
+        );
+        if (appointmentCount != null && appointmentCount > 0) {
             throw new SysException(ServerStatus.SCHEDULE_HAS_APPOINTMENT);
         }
 
